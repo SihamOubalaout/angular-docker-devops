@@ -6,10 +6,10 @@ pipeline {
     environment {
         // Adding Docker to PATH for Windows
         PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin"
-    
-    environment {
+        
         // Use Jenkins credentials to securely manage Docker Hub credentials
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
+        
         // Set Docker image name using the Docker Hub username and build number
         DOCKER_IMAGE = "oubalaoutsiham/awwin:${env.BUILD_NUMBER}"
     }
@@ -38,7 +38,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Login to DockerHub') {
             steps {
                 script {
