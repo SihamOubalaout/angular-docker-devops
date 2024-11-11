@@ -6,10 +6,12 @@ pipeline {
     environment {
         // Adding Docker to PATH for Windows
         PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin"
-        // Replace 'docker-hub-credentials' with your Docker Hub credentials ID in Jenkins
+    
+    environment {
+        // Use Jenkins credentials to securely manage Docker Hub credentials
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
-        // Set Docker image name using environment variable for Docker Hub username
-        DOCKER_IMAGE = "oubalaoutsiham/angular-17-crud-app:${env.BUILD_NUMBER}"
+        // Set Docker image name using the Docker Hub username and build number
+        DOCKER_IMAGE = "oubalaoutsiham/awwin:${env.BUILD_NUMBER}"
     }
     
     stages {
@@ -22,7 +24,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image using the Dockerfile
+                    // Build the Docker image using the Docker Hub username
                     bat "docker build -t ${DOCKER_IMAGE} ."
                 }
             }
@@ -36,11 +38,11 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Login to DockerHub') {
             steps {
                 script {
-                    // Use Jenkins credentials to securely login to Docker Hub
+                    // Use Jenkins credentials securely for Docker Hub login
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         bat "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
                     }
@@ -51,8 +53,17 @@ pipeline {
         stage('Push to DockerHub') {
             steps {
                 script {
-                    // Push the Docker image to Docker Hub repository
+                    // Push the Docker image to Docker Hub
                     bat "docker push ${DOCKER_IMAGE}"
+                }
+            }
+        }
+
+        stage('Deploy Backend') {
+            steps {
+                script {
+                    // Example of deploying the Spring backend application (customize as needed)
+                    bat "docker run -d -p 8081:8081 spring-app"
                 }
             }
         }
@@ -60,7 +71,7 @@ pipeline {
         stage('Deploy Frontend') {
             steps {
                 script {
-                    // Deploy the Angular frontend (customize port as needed)
+                    // Deploy the Angular frontend (customize as needed)
                     bat "docker run -d -p 4201:80 ${DOCKER_IMAGE}"
                 }
             }
@@ -69,7 +80,7 @@ pipeline {
 
     post {
         always {
-            // Ensure Docker logout after the pipeline completes
+            // Ensure logout from Docker Hub after pipeline completes
             bat "docker logout"
         }
     }
