@@ -8,7 +8,7 @@ pipeline {
         // Replace 'docker-hub-credentials' with each user's Docker Hub credentials ID
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
         // Set Docker image name using environment variable for Docker Hub username
-        DOCKER_IMAGE = "Siham Oubalaout/angular-17-crud-app:${env.BUILD_NUMBER}"
+        DOCKER_IMAGE = "oubalaoutsiham/angular-17-crud-app:${env.BUILD_NUMBER}"
 
     }
     
