@@ -44,7 +44,7 @@ pipeline {
                 script {
                     // Use Jenkins credentials securely for Docker Hub login
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        // Using echo to securely pass the password to docker login
+                        // Securely pass the password using stdin
                         bat "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
                     }
                 }
