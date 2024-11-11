@@ -1,17 +1,14 @@
-pipeline {
+
+        
+      pipeline {
     agent any
-    tools {
-        maven 'Maven' // Ensure Maven is installed in Jenkins
-    }
+    
     environment {
-        // Adding Docker to PATH for Windows
-        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin"
-        
-        // Use Jenkins credentials to securely manage Docker Hub credentials
+       PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        // Docker Hub credentials ID configured in Jenkins
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
-        
-        // Set Docker image name using the Docker Hub username and build number
-        DOCKER_IMAGE = "oubalaoutsiham/awwin:${env.BUILD_NUMBER}"
+        // Docker image name using the Docker Hub username and build number
+        DOCKER_IMAGE = "${DOCKERHUB_CREDENTIALS_USR}/awwin:${env.BUILD_NUMBER}"
     }
     
     stages {
@@ -24,7 +21,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image using the Docker Hub username
+                    // Build the Docker image using the Docker Hub username and image tag
                     bat "docker build -t ${DOCKER_IMAGE} ."
                 }
             }
@@ -42,9 +39,8 @@ pipeline {
         stage('Login to DockerHub') {
             steps {
                 script {
-                    // Use Jenkins credentials securely for Docker Hub login
+                    // Login to Docker Hub using Jenkins credentials (DOCKER_USERNAME and DOCKER_PASSWORD)
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        // Securely pass the password using stdin
                         bat "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
                     }
                 }
@@ -54,7 +50,7 @@ pipeline {
         stage('Push to DockerHub') {
             steps {
                 script {
-                    // Push the Docker image to Docker Hub
+                    // Push the Docker image to the user's Docker Hub repository
                     bat "docker push ${DOCKER_IMAGE}"
                 }
             }
@@ -63,7 +59,7 @@ pipeline {
         stage('Deploy Backend') {
             steps {
                 script {
-                    // Example of deploying the Spring backend application (customize as needed)
+                    // Example of deploying the Spring backend application (customize port as needed)
                     bat "docker run -d -p 8081:8081 spring-app"
                 }
             }
@@ -72,7 +68,7 @@ pipeline {
         stage('Deploy Frontend') {
             steps {
                 script {
-                    // Deploy the Angular frontend (customize as needed)
+                    // Deploy the Angular frontend (customize port as needed)
                     bat "docker run -d -p 4201:80 ${DOCKER_IMAGE}"
                 }
             }
