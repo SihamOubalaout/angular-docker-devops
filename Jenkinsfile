@@ -1,13 +1,12 @@
 
-        
       pipeline {
     agent any
     
     environment {
        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin"
-        // Docker Hub credentials ID configured in Jenkins
+        // Replace 'docker-hub-credentials' with each user's Docker Hub credentials ID
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
-        // Docker image name using the Docker Hub username and build number
+        // Set Docker image name using environment variable for Docker Hub username
         DOCKER_IMAGE = "${DOCKERHUB_CREDENTIALS_USR}/awwin:${env.BUILD_NUMBER}"
     }
     
@@ -21,7 +20,7 @@
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image using the Docker Hub username and image tag
+                    // Build the Docker image using the user's Docker Hub username
                     bat "docker build -t ${DOCKER_IMAGE} ."
                 }
             }
@@ -39,10 +38,8 @@
         stage('Login to DockerHub') {
             steps {
                 script {
-                    // Login to Docker Hub using Jenkins credentials (DOCKER_USERNAME and DOCKER_PASSWORD)
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        bat "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-                    }
+                    // Login to Docker Hub using the provided credentials
+                    bat "docker login -u ${DOCKERHUB_CREDENTIALS_USR} -p ${DOCKERHUB_CREDENTIALS_PSW}"
                 }
             }
         }
@@ -50,7 +47,7 @@
         stage('Push to DockerHub') {
             steps {
                 script {
-                    // Push the Docker image to the user's Docker Hub repository
+                    // Push the image to the user's Docker Hub repository
                     bat "docker push ${DOCKER_IMAGE}"
                 }
             }
@@ -59,7 +56,7 @@
         stage('Deploy Backend') {
             steps {
                 script {
-                    // Example of deploying the Spring backend application (customize port as needed)
+                    // Deploy the Spring backend application (customize port as needed)
                     bat "docker run -d -p 8081:8081 spring-app"
                 }
             }
