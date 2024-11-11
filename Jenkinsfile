@@ -1,7 +1,10 @@
 pipeline {
     agent any
-    
+    tools {
+        maven 'Maven' // Ensure Maven is installed in Jenkins
+    }
     environment {
+        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin"
         // Replace 'docker-hub-credentials' with each user's Docker Hub credentials ID
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
         // Set Docker image name using environment variable for Docker Hub username
